@@ -1,0 +1,56 @@
+================================================================================
+RELATÓRIO DE RESOLUÇÃO DE PROBLEMAS: PIPELINE HARDWARE HUMANO
+ETAPA: Da Ingestão à Migração PostgreSQL
+================================================================================
+
+1. DESAFIOS DE INGESTÃO E PADRONIZAÇÃO (SPRINT 1)
+--------------------------------------------------------------------------------
+- ERRO: "KeyError: 'value'" ou "KeyError: 'timestamp'".
+- CAUSA: Variação de esquemas nos JSONs do Fitbit. Algumas colunas vinham como
+  'dateTime', outras como 'time'. O campo 'value' por vezes era um número e 
+  outras vezes um dicionário contendo {'bpm': x}.
+- SOLUÇÃO: Implementação de lógica condicional e funções lambda para extrair 
+  os dados independentemente do formato (df.apply(lambda x: x.get('bpm'))).
+
+- ERRO: "no such table: well_being" / "Aviso: Arquivo não encontrado".
+- CAUSA: Mapeamento incorreto de arquivos. O script buscava 'well_being.csv', 
+  mas o dataset original utilizava 'wellness.csv'.
+- SOLUÇÃO: Data Profiling via Python (os.listdir) para identificar o nome real 
+  e mapeamento manual das colunas específicas ('effective_time_frame' -> 'date').
+
+2. ESTABILIDADE DA CONEXÃO E BLOQUEIOS (SPRINT 2)
+--------------------------------------------------------------------------------
+- ERRO: "OperationalError: database is locked".
+- CAUSA: Conexões zumbis no Kernel do Jupyter ou instâncias do SQLite CLI 
+  abertas, impedindo a escrita (o SQLite permite apenas uma escrita por vez).
+- SOLUÇÃO: Reinicialização do Kernel e ajuste da indentação do comando 
+  'conn.close()' para garantir o fechamento da conexão apenas após o fim do loop.
+
+3. O GARGALO DE PERFORMANCE ANALÍTICA (SPRINT 3)
+--------------------------------------------------------------------------------
+- PROBLEMA: Execução da VIEW de RHR demorando +30 minutos.
+- CAUSA: O SQLite realizava um "Range JOIN" (BETWEEN) via Produto Cartesiano 
+  em milhões de linhas sem otimizador de busca analítica.
+- SOLUÇÃO 1 (Tentativa): Criação de índices (B-Tree). Reduziu o tempo, mas 
+  permaneceu instável para o volume total.
+- SOLUÇÃO 2 (Evolutiva): Migração do cálculo para a memória RAM via Pandas 
+  MultiIndex Slicing. O processamento caiu para segundos, mas identificou a 
+  necessidade de um banco de dados mais potente.
+
+4. INFRAESTRUTURA E SEGURANÇA NA MIGRAÇÃO (SPRINT 4)
+--------------------------------------------------------------------------------
+- ERRO: "psycopg2.OperationalError: connection failed: Invalid argument (10022)".
+- CAUSA: Conflito de caracteres especiais na senha do PostgreSQL (o @ na senha 
+  interrompia a leitura da URI de conexão).
+- SOLUÇÃO: Implementação de "URL Encoding" usando a biblioteca urllib.parse 
+  para blindar a senha (senha_segura = urllib.parse.quote_plus(senha)).
+
+- ESTRATÉGIA DE TRANSFERÊNCIA: 
+- PROBLEMA: Risco de estouro de memória ao mover milhões de linhas entre bancos.
+- SOLUÇÃO: Implementação de "Chunking" (leitura e escrita em blocos de 100k 
+  linhas), garantindo uma migração fluida e segura para o PostgreSQL.
+
+================================================================================
+STATUS ATUAL: Dados migrados com integridade para o PostgreSQL. 
+PRÓXIMA ETAPA: Criação de Materialized Views e Análise de Correlação.
+================================================================================

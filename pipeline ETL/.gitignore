@@ -1,0 +1,23 @@
+# Segurança e Credenciais (CRÍTICO)
+.env
+.env.local
+
+# Bancos de Dados Locais e Dados Brutos
+*.db
+*.sqlite3
+hardware_humano.db
+osfstorage-archive/
+pmdata/
+
+# Ambientes Virtuais e Caches
+.venv/
+venv/
+__pycache__/
+.ipynb_checkpoints/
+*/.ipynb_checkpoints/*
+
+# IDEs e Sistema
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
