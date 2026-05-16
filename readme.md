@@ -41,7 +41,7 @@ O projeto segue a evolução de uma arquitetura de dados moderna estruturada em 
 O encerramento do pipeline de dados ocorre na camada de consumo visual. O arquivo `dashboards/painel_atleta_tech.pbix` conecta-se diretamente ao PostgreSQL por meio de DirectQuery/Import da Materialized View `mv_saude_tech_integrada`, garantindo que os dados analíticos sejam consumidos em tempo real sem sobrecarregar o servidor.
 
 ### 📸 Demonstração do Painel
-![Demonstração do Dashboard](./pipeline%20ETL/dashboards/print_dashboard.png)
+![Demonstração do Dashboard](./dashboards/print_dashboard.png)
 
 ### Recursos Disponíveis no Dashboard:
 * [cite_start]**Indicadores Executivos (KPIs):** Monitoramento instantâneo do total de Alertas Críticos de Saúde Mental ativados, média global da Qualidade do Sono e Frequência Cardíaca de Repouso (RHR) do time.
